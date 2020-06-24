@@ -3,6 +3,8 @@ import re
 import random
 import requests
 import string
+import os
+from subprocess import call
 from torrent_class import Torrent_Link 
 
 def choose_torrent_website():
@@ -54,7 +56,11 @@ def main():
         print(f'{num} {t.name}     Size: {t.size}     S: {t.seeders}')
     
     selected = input('Torrent num?: ')
-    print(top_torrents[int(selected)-1].magnet)
+    try:
+        call(['deluge-console', 'add', '-p', '/media/ntfsdrive/PLEX/Anime/', top_torrents[int(selected) - 1].magnet])
+    except:
+        print("Error running deluge-console")
+        print(top_torrents[int(selected)-1].magnet)
 
 
 if __name__ == '__main__':
