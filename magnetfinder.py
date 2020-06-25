@@ -5,7 +5,22 @@ import requests
 import string
 import os
 from subprocess import call
-from torrent_class import Torrent_Link 
+from prettytable import PrettyTable
+
+class Torrent_Link():
+
+    def name(self, name):
+        self.name = name
+
+    def magnetlink(self, link):
+        self.magnet = link
+
+    def size(self, size):
+        self.size = size
+
+    def tseeders(self, seeders):
+        self.seeders = seeders
+
 
 def choose_torrent_website():
     accepted_links = ['nyaa', 'piratebay']
@@ -37,7 +52,7 @@ def main():
     data = requests.get(link).text
     soup = bs.BeautifulSoup(data, "lxml")
     top_torrents = []
-    for torrent in soup.find_all('tr')[:10]: 
+    for torrent in soup.find_all('tr')[:21]: 
         currentTorrent = Torrent_Link()
         for link in torrent.find_all('a'):
             if(link.get('title') != None):
@@ -52,12 +67,31 @@ def main():
                     currentTorrent.size(info.text)
                 else:
                     currentTorrent.seeders = info.text
-    for num, t in enumerate(top_torrents, 1):
-        print(f'{num} {t.name}     Size: {t.size}     S: {t.seeders}')
+    x = PrettyTable()
+    x.field_names = ["#", "Name", "Size", "Seeders"]
+    x.align['Name'] = 'l'
+    x.align['Size'] = 'l'
+    x.align['Seeders'] = 'l'
+    for num, t in enumerate(top_torrents[:10], 1):
+        x.add_row([num, t.name, t.size, t.seeders])
+
+    print(x)
     
-    selected = input('Torrent num?: ')
+    selected = input('Torrent num? (n for next 10): ')
+    if(selected.lower() == 'n'):
+        for num, t in enumerate(top_torrents[10:], 11):
+            x.add_row([num, t.name, t.size, t.seeders])
+        print(x)
+    else:
+        try:
+            call(['sudo', 'deluge-console', 'add', '-p', '/media/ntfsdrive/PLEX/Anime/', top_torrents[int(selected) - 1].magnet])
+        except:
+            print("Error running deluge-console")
+            print(top_torrents[int(selected)-1].magnet)
+
+    selected = input('Torrent num? (1-20): ')
     try:
-        call(['deluge-console', 'add', '-p', '/media/ntfsdrive/PLEX/Anime/', top_torrents[int(selected) - 1].magnet])
+        call(['sudo', 'deluge-console', 'add', '-p', '/media/ntfsdrive/PLEX/Anime/', top_torrents[int(selected) - 1].magnet])
     except:
         print("Error running deluge-console")
         print(top_torrents[int(selected)-1].magnet)
