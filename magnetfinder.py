@@ -25,48 +25,72 @@ class Torrent_Link():
 def choose_torrent_website():
     accepted_links = ['nyaa', 'piratebay']
     choice = input('Torrent Site: ')
+    choice = choice.lower()
     if(choice in accepted_links):
         if(choice == 'nyaa'):
             link = 'https://nyaa.si/?f=0&c=0_0&q='
             sortbyseeders = '&s=seeders&o=desc'
         if(choice == 'piratebay'):
-            link = 'https://www.pirate-bay.net/search?q='
+            link = 'https://www.tpb.party/search/'
             sortbyseeders = ''
     elif(choice.lower() == 'a'):
         link = 'https://nyaa.si/?f=0&c=0_0&q='
         sortbyseeders = '&s=seeders&o=desc'
         sortbyseeders = '&s=seeders&o=desc'
     elif(choice.lower() == 'm' or choice.lower() == 'tv'):
-        link = 'https://www.pirate-bay.net/search?q='
+        link = 'https://www.tpb.party/search/'
         sortbyseeders = ''
     
-    return link, sortbyseeders
+    
+    return link, sortbyseeders, choice
 
 
 
 def main():
-    link, sortbyseeders = choose_torrent_website()
+    link, sortbyseeders, choice = choose_torrent_website()
     original_query = input('Enter torrent name: ')
     search_query = re.sub(r"\s+", "+", original_query)
     link = ''.join([link, search_query, sortbyseeders]) 
     data = requests.get(link).text
     soup = bs.BeautifulSoup(data, "lxml")
     top_torrents = []
-    for torrent in soup.find_all('tr')[:21]: 
-        currentTorrent = Torrent_Link()
-        for link in torrent.find_all('a'):
-            if(link.get('title') != None):
-                if(all((word.lower() in link.get('title').lower() for word in original_query.split()))):
-                    currentTorrent.name(link.get('title'))
-                    top_torrents.append(currentTorrent)
-            if('magnet' in link['href'].lower()):
-                currentTorrent.magnetlink(link['href'])
-        for info in torrent.find_all('td', {'class': 'text-center'})[:4]:
-            if(not '-' in info.text):
-                if('B' in info.text):
-                    currentTorrent.size(info.text)
-                else:
-                    currentTorrent.seeders = info.text
+    if(choice == 'a' or choice == 'nyaa'):
+        for torrent in soup.find_all('tr')[:21]: 
+            currentTorrent = Torrent_Link()
+            for link in torrent.find_all('a'):
+                if(link.get('title') != None):
+                    if(all((word.lower() in link.get('title').lower() for word in original_query.split()))):
+                        currentTorrent.name(link.get('title'))
+                        top_torrents.append(currentTorrent)
+                if('magnet' in link['href'].lower()):
+                    currentTorrent.magnetlink(link['href'])
+            for info in torrent.find_all('td', {'class': 'text-center'})[:4]:
+                if(not '-' in info.text):
+                    if('B' in info.text):
+                        currentTorrent.size(info.text)
+                    else:
+                        currentTorrent.seeders = info.text
+    if(choice == 'm' or choice == 'tv' or choice =='piratebay'):
+        for row in soup.find_all('tr')[:21]:
+            currentTorrent = Torrent_Link()
+            for torrent in row.find_all('div', {'class': 'detName'}):
+                currentTorrent.name((torrent.find('a', {'class': 'detLink'})['title']))
+                top_torrents.append(currentTorrent)
+            for mag in row.find_all('a', href=True):
+                if('magnet' in mag['href'].lower()):
+                    currentTorrent.magnetlink((mag['href']))
+            if(row.find('font', {'class': 'detDesc'}) is not None):
+                desc = row.find('font', {'class': 'detDesc'}).text
+                try:
+                    size = re.search('Size(.+?),', desc)
+                    currentTorrent.size(size.group(1))
+                except:
+                    currentTorrent.size('#')
+            if(row.find('td', {'align': 'right'}) is not None):
+                currentTorrent.seeders = row.find('td', {'align': 'right'}).text
+            else:
+                currentTorrent.seeders = '#'
+
     x = PrettyTable()
     x.field_names = ["#", "Name", "Size", "Seeders"]
     x.align['Name'] = 'l'
