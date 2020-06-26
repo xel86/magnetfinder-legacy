@@ -18,7 +18,7 @@ class Torrent_Link():
     def size(self, size):
         self.size = size
 
-    def tseeders(self, seeders):
+    def seeders(self, seeders):
         self.seeders = seeders
 
 
@@ -54,7 +54,9 @@ def main():
     data = requests.get(link).text
     soup = bs.BeautifulSoup(data, "lxml")
     top_torrents = []
+    directory = None
     if(choice == 'a' or choice == 'nyaa'):
+        directory = '/media/ntfsdrive/PLEX/Anime'
         for torrent in soup.find_all('tr')[:21]: 
             currentTorrent = Torrent_Link()
             for link in torrent.find_all('a'):
@@ -71,10 +73,14 @@ def main():
                     else:
                         currentTorrent.seeders = info.text
     if(choice == 'm' or choice == 'tv' or choice =='piratebay'):
+        if(choice == 'tv'):
+            directory = '/media/ntfsdrive/PLEX/TV\\ Shows/'
+        else:
+            directory = '/media/ntfsdrive/PLEX/Movies'
         for row in soup.find_all('tr')[:21]:
             currentTorrent = Torrent_Link()
             for torrent in row.find_all('div', {'class': 'detName'}):
-                currentTorrent.name((torrent.find('a', {'class': 'detLink'})['title']))
+                currentTorrent.name((torrent.find('a', {'class': 'detLink'})['title'])[11:])
                 top_torrents.append(currentTorrent)
             for mag in row.find_all('a', href=True):
                 if('magnet' in mag['href'].lower()):
@@ -100,7 +106,7 @@ def main():
         x.add_row([num, t.name, t.size, t.seeders])
 
     print(x)
-    
+    close = False
     selected = input('Torrent num? (n for next 10): ')
     if(selected.lower() == 'n'):
         for num, t in enumerate(top_torrents[10:], 11):
@@ -108,17 +114,23 @@ def main():
         print(x)
     else:
         try:
-            call(['sudo', 'deluge-console', 'add', '-p', '/media/ntfsdrive/PLEX/Anime/', top_torrents[int(selected) - 1].magnet])
+            call(['sudo', 'deluge-console', 'add', '-p', directory, top_torrents[int(selected) - 1].magnet])
+            close = True
         except:
             print("Error running deluge-console")
             print(top_torrents[int(selected)-1].magnet)
+            close=True
+    if(close == True):
+        quit()
 
     selected = input('Torrent num? (1-20): ')
     try:
-        call(['sudo', 'deluge-console', 'add', '-p', '/media/ntfsdrive/PLEX/Anime/', top_torrents[int(selected) - 1].magnet])
+        call(['sudo', 'deluge-console', 'add', '-p', directory, top_torrents[int(selected) - 1].magnet])
+        
     except:
         print("Error running deluge-console")
         print(top_torrents[int(selected)-1].magnet)
+        
 
 
 if __name__ == '__main__':
