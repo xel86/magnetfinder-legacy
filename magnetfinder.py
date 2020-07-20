@@ -56,7 +56,17 @@ def main():
     top_torrents = []
     directory = None
     if(choice == 'a' or choice == 'nyaa'):
-        directory = '/media/ntfsdrive/PLEX/Anime'
+        series_status = input('On-Going or Finished Series?(O / F): ')
+        if(series_status.lower() == 'o'):
+            try:
+                directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)
+            try:
+                call(['sudo', 'mkdir', '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)])
+                directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)
+            except:
+                print('Error making directory for On-Going show, directory should be in default Anime directory')
+        else:
+            directory = '/media/ntfsdrive/PLEX/Anime'
         for torrent in soup.find_all('tr')[:21]: 
             currentTorrent = Torrent_Link()
             for link in torrent.find_all('a'):
