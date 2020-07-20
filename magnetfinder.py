@@ -59,8 +59,7 @@ def main():
         series_status = input('On-Going or Finished Series?(O / F): ')
         if(series_status.lower() == 'o'):
             try:
-                try:
-                    directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)
+                directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)
             except:
                 call(['sudo', 'mkdir', '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)])
                 directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)
