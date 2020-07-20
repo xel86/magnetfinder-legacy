@@ -59,12 +59,11 @@ def main():
         series_status = input('On-Going or Finished Series?(O / F): ')
         if(series_status.lower() == 'o'):
             try:
-                directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)
-            try:
+                try:
+                    directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)
+            except:
                 call(['sudo', 'mkdir', '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)])
                 directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)
-            except:
-                print('Error making directory for On-Going show, directory should be in default Anime directory')
         else:
             directory = '/media/ntfsdrive/PLEX/Anime'
         for torrent in soup.find_all('tr')[:21]: 
