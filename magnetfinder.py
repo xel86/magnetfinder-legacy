@@ -58,10 +58,23 @@ def main():
     if(choice == 'a' or choice == 'nyaa'):
         series_status = input('On-Going or Finished Series?(O / F): ')
         if(series_status.lower() == 'o'):
+        	show_list = open('ongoing_directories.txt', 'a+')
+        	new_show = input('New Show? (Y/N): ')
+        	if new_show.lower() == 'Y':
+        		new_show_name = input('Enter Name of New Show: ')
+        		f.write(new_show_name +'\n')
+        		show_directory_name = new_show_name
+        	else:
+        		all_ongoing_shows = f.readlines()
+        		for num, show in enumerate(all_ongoing_shows):
+        			print(f'{num} {show}')
+        		show_choice = input('Choose which show to add too (0-#): ')
+        		show_directory_name = all_ongoing_shows[show_choice]
+
             try:
-                directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)
+                directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\ ", show_directory_name)
             except:
-                call(['sudo', 'mkdir', '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)])
+                call(['sudo', 'mkdir', '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\", original_query)])
                 directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)
         else:
             directory = '/media/ntfsdrive/PLEX/Anime'
