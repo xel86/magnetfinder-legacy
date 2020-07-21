@@ -65,6 +65,7 @@ def main():
                 show_list.write(new_show_name +'\n')
                 show_directory_name = new_show_name
                 show_list.close()
+                directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\ ", show_directory_name)
             else:
                 show_list = open('ongoing_directories.txt', 'r')
                 all_ongoing_shows = show_list.readlines()
@@ -72,11 +73,8 @@ def main():
                     print(f'({num+1}) {show}')
                 show_choice = input('Choose which show to add too (1-#): ')
                 show_directory_name = all_ongoing_shows[int(show_choice)-1]
-            try:
                 directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\ ", show_directory_name)
-            except:
-                call(['sudo', 'mkdir', '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\", original_query)])
-                directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\", show_directory_name)
+                directory = directory[:-2] #deletes unneeded space added after reading in from file
         else:
             directory = '/media/ntfsdrive/PLEX/Anime'
         for torrent in soup.find_all('tr')[:21]: 
