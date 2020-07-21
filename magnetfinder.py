@@ -56,26 +56,27 @@ def main():
     top_torrents = []
     directory = None
     if(choice == 'a' or choice == 'nyaa'):
-        series_status = input('On-Going or Finished Series?(O / F): ')
+        series_status = input('On-Going or Finished Series? (O / F): ')
         if(series_status.lower() == 'o'):
-        	show_list = open('ongoing_directories.txt', 'a+')
-        	new_show = input('New Show? (Y/N): ')
-        	if new_show.lower() == 'Y':
-        		new_show_name = input('Enter Name of New Show: ')
-        		f.write(new_show_name +'\n')
-        		show_directory_name = new_show_name
-        	else:
-        		all_ongoing_shows = f.readlines()
-        		for num, show in enumerate(all_ongoing_shows):
-        			print(f'{num} {show}')
-        		show_choice = input('Choose which show to add too (0-#): ')
-        		show_directory_name = all_ongoing_shows[show_choice]
-
+            show_list = open('ongoing_directories.txt', 'a+')
+            new_show = input('New Folder? (Y/N): ')
+            if new_show.lower() == 'y':
+                new_show_name = input('Enter Name of New Folder: ')
+                show_list.write(new_show_name +'\n')
+                show_directory_name = new_show_name
+                show_list.close()
+            else:
+                show_list = open('ongoing_directories.txt', 'r')
+                all_ongoing_shows = show_list.readlines()
+                for num, show in enumerate(all_ongoing_shows):
+                    print(f'({num+1}) {show}')
+                show_choice = input('Choose which show to add too (1-#): ')
+                show_directory_name = all_ongoing_shows[int(show_choice)-1]
             try:
                 directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\ ", show_directory_name)
             except:
                 call(['sudo', 'mkdir', '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\", original_query)])
-                directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "_", original_query)
+                directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\", show_directory_name)
         else:
             directory = '/media/ntfsdrive/PLEX/Anime'
         for torrent in soup.find_all('tr')[:21]: 
