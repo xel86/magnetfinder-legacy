@@ -48,6 +48,7 @@ def choose_torrent_website():
 
 def main():
     link, sortbyseeders, choice = choose_torrent_website()
+    type_of_media = input('Movie or Series? (M / S): ')
     original_query = input('Enter torrent name: ')
     search_query = re.sub(r"\s+", "+", original_query)
     link = ''.join([link, search_query, sortbyseeders]) 
@@ -56,27 +57,30 @@ def main():
     top_torrents = []
     directory = None
     if(choice == 'a' or choice == 'nyaa'):
-        series_status = input('On-Going or Finished Series? (O / F): ')
-        if(series_status.lower() == 'o'):
-            show_list = open('ongoing_directories.txt', 'a+')
-            new_show = input('New Folder? (Y/N): ')
-            if new_show.lower() == 'y':
-                new_show_name = input('Enter Name of New Folder: ')
-                show_list.write(new_show_name +'\n')
-                show_directory_name = new_show_name
-                show_list.close()
-                directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\ ", show_directory_name)
+        if(type_of_media.lower() == 's' or type_of_media.lower() == 'series'):
+            series_status = input('On-Going or Finished Series? (O / F): ')
+            if(series_status.lower() == 'o'):
+                show_list = open('ongoing_directories.txt', 'a+')
+                new_show = input('New Folder? (Y/N): ')
+                if new_show.lower() == 'y':
+                    new_show_name = input('Enter Name of New Folder: ')
+                    show_list.write(new_show_name +'\n')
+                    show_directory_name = new_show_name
+                    show_list.close()
+                    directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\ ", show_directory_name)
+                else:
+                    show_list = open('ongoing_directories.txt', 'r')
+                    all_ongoing_shows = show_list.readlines()
+                    for num, show in enumerate(all_ongoing_shows):
+                        print(f'({num+1}) {show}')
+                    show_choice = input('Choose which show to add too (1-#): ')
+                    show_directory_name = all_ongoing_shows[int(show_choice)-1]
+                    directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\ ", show_directory_name)
+                    directory = directory[:-2] #deletes unneeded space added after reading in from file
             else:
-                show_list = open('ongoing_directories.txt', 'r')
-                all_ongoing_shows = show_list.readlines()
-                for num, show in enumerate(all_ongoing_shows):
-                    print(f'({num+1}) {show}')
-                show_choice = input('Choose which show to add too (1-#): ')
-                show_directory_name = all_ongoing_shows[int(show_choice)-1]
-                directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\ ", show_directory_name)
-                directory = directory[:-2] #deletes unneeded space added after reading in from file
-        else:
-            directory = '/media/ntfsdrive/PLEX/Anime'
+                directory = '/media/ntfsdrive/PLEX/Anime'
+        elif(type_of_media.lower() == 'm' or type_of_media.lower() == 'movie'):
+            directory = '/media/ntfsdrive/PLEX/Movies'
         for torrent in soup.find_all('tr')[:21]: 
             currentTorrent = Torrent_Link()
             for link in torrent.find_all('a'):
@@ -93,9 +97,10 @@ def main():
                     else:
                         currentTorrent.seeders = info.text
     if(choice == 'm' or choice == 'tv' or choice =='piratebay'):
-        if(choice == 'tv'):
+
+        if(type_of_media.lower() == 's' or type_of_media.lower() == 'series'):
             directory = '/media/ntfsdrive/PLEX/TV\\ Shows/'
-        else:
+        elif(type_of_media.lower() == 'm' or type_of_media.lower() == 'movie'):
             directory = '/media/ntfsdrive/PLEX/Movies'
         for row in soup.find_all('tr')[:21]:
             currentTorrent = Torrent_Link()
