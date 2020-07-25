@@ -6,6 +6,11 @@ import string
 import os
 from subprocess import call
 from prettytable import PrettyTable
+from pathlib import Path
+from configparser import ConfigParser
+
+config = ConfigParser()
+config.read('config.ini')
 
 class Torrent_Link():
 
@@ -67,7 +72,7 @@ def main():
                     show_list.write(new_show_name +'\n')
                     show_directory_name = new_show_name
                     show_list.close()
-                    directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\ ", show_directory_name)
+                    directory = Path(config['directories']['anime'] + re.sub(r"\s+", "\\ ", show_directory_name))
                 else:
                     show_list = open('ongoing_directories.txt', 'r')
                     all_ongoing_shows = show_list.readlines()
@@ -75,12 +80,12 @@ def main():
                         print(f'({num+1}) {show}')
                     show_choice = input('Choose which show to add too (1-#): ')
                     show_directory_name = all_ongoing_shows[int(show_choice)-1]
-                    directory = '/media/ntfsdrive/PLEX/Anime/' + re.sub(r"\s+", "\\ ", show_directory_name)
-                    directory = directory[:-2] #deletes unneeded space added after reading in from file
+                    directory = Path(config['directories']['anime'] + re.sub(r"\s+", "\\ ", show_directory_name))
+                    directory = Path(directory[:-2]) #deletes unneeded space added after reading in from file
             else:
-                directory = '/media/ntfsdrive/PLEX/Anime'
+                directory = Path(config['directories']['anime'])
         elif(type_of_media.lower() == 'm' or type_of_media.lower() == 'movie'):
-            directory = '/media/ntfsdrive/PLEX/Movies'
+            directory = Path(config['directories']['movies'])
         for torrent in soup.find_all('tr')[:21]: 
             currentTorrent = Torrent_Link()
             for link in torrent.find_all('a'):
@@ -99,9 +104,9 @@ def main():
     if(choice == 'm' or choice == 'tv' or choice =='piratebay'):
 
         if(type_of_media.lower() == 's' or type_of_media.lower() == 'series'):
-            directory = '/media/ntfsdrive/PLEX/TV\\ Shows/'
+            directory = Path(config['directories']['tvshows'])
         elif(type_of_media.lower() == 'm' or type_of_media.lower() == 'movie'):
-            directory = '/media/ntfsdrive/PLEX/Movies'
+            directory = Path(config['directories']['movies'])
         for row in soup.find_all('tr')[:21]:
             currentTorrent = Torrent_Link()
             for torrent in row.find_all('div', {'class': 'detName'}):
@@ -157,7 +162,7 @@ def main():
         except:
             print("Error running deluge-console")
             print(top_torrents[int(num)-1].magnet)
-        
+
 
 
 if __name__ == '__main__':
