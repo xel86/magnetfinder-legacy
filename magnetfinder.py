@@ -74,8 +74,8 @@ def main():
                     show_list.close()
                     directory = Path(config['directories']['anime'] + re.sub(r"\s+", "\\ ", show_directory_name))
                 else:
-                    show_list = open('ongoing_directories.txt', 'r')
-                    all_ongoing_shows = show_list.readlines()
+                    with open('ongoing_directories.txt', 'r') as f:
+                        all_ongoing_shows = f.read().splitlines()
                     for num, show in enumerate(all_ongoing_shows):
                         print(f'({num+1}) {show}')
                     show_choice = input('Choose which show to add too (1-#): ')
