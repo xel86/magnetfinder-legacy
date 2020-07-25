@@ -132,29 +132,31 @@ def main():
 
     print(x)
     close = False
-    selected = input('Torrent num? (n for next 10): ')
+    selected = input('Torrent num(s)? (n for next 10): ')
     if(selected.lower() == 'n'):
         for num, t in enumerate(top_torrents[10:], 11):
             x.add_row([num, t.name, t.size, t.seeders])
         print(x)
     else:
-        try:
-            call(['sudo', 'deluge-console', 'add', '-p', directory, top_torrents[int(selected) - 1].magnet])
-            close = True
-        except:
-            print("Error running deluge-console")
-            print(top_torrents[int(selected)-1].magnet)
-            close=True
+    	for num in selected.split():
+	        try:
+	            call(['sudo', 'deluge-console', 'add', '-p', directory, top_torrents[int(num) - 1].magnet])
+	            close = True
+	        except:
+	            print("Error running deluge-console")
+	            print(top_torrents[int(num)-1].magnet)
+	            close=True
     if(close == True):
         quit()
 
-    selected = input('Torrent num? (1-20): ')
-    try:
-        call(['sudo', 'deluge-console', 'add', '-p', directory, top_torrents[int(selected) - 1].magnet])
-        
-    except:
-        print("Error running deluge-console")
-        print(top_torrents[int(selected)-1].magnet)
+    selected = input('Torrent num(s)? (ex: 1 5 4): ')
+    for num in selected.split():
+	    try:
+	        call(['sudo', 'deluge-console', 'add', '-p', directory, top_torrents[int(num) - 1].magnet])
+	        
+	    except:
+	        print("Error running deluge-console")
+	        print(top_torrents[int(num)-1].magnet)
         
 
 
