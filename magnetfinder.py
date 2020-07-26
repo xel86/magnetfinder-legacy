@@ -8,6 +8,7 @@ from subprocess import call
 from prettytable import PrettyTable
 from pathlib import Path
 from configparser import ConfigParser
+import platform
 
 config = ConfigParser()
 config.read('config.ini')
@@ -72,7 +73,10 @@ def main():
                     show_list.write(new_show_name +'\n')
                     show_directory_name = new_show_name
                     show_list.close()
-                    directory = Path(config['directories']['anime'] + re.sub(r"\s+", "\\ ", show_directory_name))
+                    if(platform.system().lower() == 'windows'):
+                        directory = Path(config['directories']['anime'] + show_directory_name)
+                    else:
+                        directory = Path(config['directories']['anime'] + re.sub(r"\s+", "\\ ", show_directory_name))
                 else:
                     with open('ongoing_directories.txt', 'r') as f:
                         all_ongoing_shows = f.read().splitlines()
@@ -80,8 +84,10 @@ def main():
                         print(f'({num+1}) {show}')
                     show_choice = input('Choose which show to add too (1-#): ')
                     show_directory_name = all_ongoing_shows[int(show_choice)-1]
-                    directory = Path(config['directories']['anime'] + re.sub(r"\s+", "\\ ", show_directory_name))
-                    directory = Path(directory[:-2]) #deletes unneeded space added after reading in from file
+                    if(platform.system().lower() == 'windows'):
+                        directory = Path(config['directories']['anime'] + show_directory_name)
+                    else:
+                        directory = Path(config['directories']['anime'] + re.sub(r"\s+", "\\ ", show_directory_name))
             else:
                 directory = Path(config['directories']['anime'])
         elif(type_of_media.lower() == 'm' or type_of_media.lower() == 'movie'):
@@ -144,11 +150,19 @@ def main():
         print(x)
     else:
         for num in selected.split():
-            try:
-                call(['sudo', 'deluge-console', 'add', '-p', directory, top_torrents[int(num) - 1].magnet])
-                close = True
-            except:
-                print("Error running deluge-console")
+            if(config['autodownload']['status'].lower() == 'true'):
+                try:
+                    if(platform.system().lower() == 'windows'):
+                        call(['aria2c', '-d', f'{Path.home().joinpath(directory)}', '--seed-time=0', f'{top_torrents[int(num) - 1].magnet}'])
+                        close = True
+                    else:
+                        call(['sudo', 'deluge-console', 'add', '-p', f'~/{directory}', top_torrents[int(num) - 1].magnet])
+                        close = True
+                except:
+                    print("Error downloading torrent")
+                    print(top_torrents[int(num)-1].magnet)
+                    close=True
+            else:
                 print(top_torrents[int(num)-1].magnet)
                 close=True
     if(close == True):
@@ -156,12 +170,18 @@ def main():
 
     selected = input('Torrent num(s)? (ex: 1 5 4): ')
     for num in selected.split():
-        try:
-            call(['sudo', 'deluge-console', 'add', '-p', directory, top_torrents[int(num) - 1].magnet])
-            
-        except:
-            print("Error running deluge-console")
+        if(config['autodownload']['status'].lower() == 'true'):
+            try:
+                if(platform.system().lower() == 'windows'):
+                    call(['aria2c', '-d', f'{Path.home().joinpath(directory)}', '--seed-time=0', f'{top_torrents[int(num) - 1].magnet}'])
+                else:
+                    call(['sudo', 'deluge-console', 'add', '-p', f'~/{directory}', top_torrents[int(num) - 1].magnet])
+            except:
+                print("Error downloading torrent")
+                print(top_torrents[int(num)-1].magnet)
+        else:
             print(top_torrents[int(num)-1].magnet)
+            close=True
 
 
 
