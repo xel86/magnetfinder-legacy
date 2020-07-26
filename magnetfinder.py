@@ -143,6 +143,7 @@ def main():
     x.align['Seeders'] = 'l'
     for num, t in enumerate(top_torrents[:10], 1):
         x.add_row([num, t.name, t.size, t.seeders])
+        t.magnet = t.magnet.split('&tr=', 1)[0]
 
     print(x)
     close = False
@@ -150,6 +151,7 @@ def main():
     if(selected.lower() == 'n'):
         for num, t in enumerate(top_torrents[10:], 11):
             x.add_row([num, t.name, t.size, t.seeders])
+            t.magnet = t.magnet.split('&tr=', 1)[0]
         print(x)
     else:
         for num in selected.split():
