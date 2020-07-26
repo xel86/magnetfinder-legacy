@@ -56,7 +56,10 @@ def main():
     link, sortbyseeders, choice = choose_torrent_website()
     type_of_media = input('Movie or Series? (M / S): ')
     original_query = input('Enter torrent name: ')
-    search_query = re.sub(r"\s+", "+", original_query)
+    if(choice == 'a' or choice == 'nyaa'):
+        search_query = re.sub(r"\s+", "+", original_query)
+    elif(choice == 'm' or choice == 'tv' or choice =='piratebay'):
+        search_query = re.sub(r"\s+", "%20", original_query) +'/1/99/0'
     link = ''.join([link, search_query, sortbyseeders]) 
     data = requests.get(link).text
     soup = bs.BeautifulSoup(data, "lxml")
