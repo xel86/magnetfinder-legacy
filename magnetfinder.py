@@ -4,6 +4,7 @@ import random
 import requests
 import string
 import os
+import lxml
 from subprocess import call
 from prettytable import PrettyTable
 from pathlib import Path
@@ -50,9 +51,36 @@ def choose_torrent_website():
     
     return link, sortbyseeders, choice
 
+def display_torrents_found(amount):
+    x = PrettyTable()
+    x.field_names = ["#", "Name", "Size", "Seeders"]
+    x.align['Name'] = 'l'
+    x.align['Size'] = 'l'
+    x.align['Seeders'] = 'l'
+    for num, t in enumerate(top_torrents[:amount], 1):
+        x.add_row([num, t.name, t.size, t.seeders])
+        t.magnet = t.magnet.split('&tr=', 1)[0]
+    print(x)
+    selected = input('Torrent num(s)? (n for next 10): ')
+    return top_torrents, selected
+
+def autodownload():
+    for num in selected.split():
+        try:
+            if(platform.system().lower() == 'windows'):
+                call(['aria2c', '-d', f'{Path.home().joinpath(directory)}', '--seed-time=0', f'{top_torrents[int(num) - 1].magnet}'])
+                close = True
+            else:
+                call(['sudo', 'deluge-console', 'add', '-p', f'~/{directory}', top_torrents[int(num) - 1].magnet])
+                close = True
+        except:
+            print("Error downloading torrent")
+            print(top_torrents[int(num)-1].magnet)
+            close=True
+    return close
 
 
-def main():
+if __name__ == '__main__':
     link, sortbyseeders, choice = choose_torrent_website()
     type_of_media = input('Movie or Series? (M / S): ')
     original_query = input('Enter torrent name: ')
@@ -66,6 +94,8 @@ def main():
     top_torrents = []
     directory = None
     if(choice == 'a' or choice == 'nyaa'):
+
+        #oranizing folders and saves folder locations if its an ongoing series
         if(type_of_media.lower() == 's' or type_of_media.lower() == 'series'):
             series_status = input('On-Going or Finished Series? (O / F): ')
             if(series_status.lower() == 'o'):
@@ -95,7 +125,9 @@ def main():
                 directory = Path(config['directories']['anime'])
         elif(type_of_media.lower() == 'm' or type_of_media.lower() == 'movie'):
             directory = Path(config['directories']['movies'])
-        for torrent in soup.find_all('tr')[:21]: 
+
+        #finds the top 50 magnet links from nyaa
+        for torrent in soup.find_all('tr')[:51]: 
             currentTorrent = Torrent_Link()
             for link in torrent.find_all('a'):
                 if(link.get('title') != None):
@@ -116,7 +148,9 @@ def main():
             directory = Path(config['directories']['tvshows'])
         elif(type_of_media.lower() == 'm' or type_of_media.lower() == 'movie'):
             directory = Path(config['directories']['movies'])
-        for row in soup.find_all('tr')[:21]:
+
+        #finds the top 50 magnet links from piratebay
+        for row in soup.find_all('tr')[:51]:
             currentTorrent = Torrent_Link()
             for torrent in row.find_all('div', {'class': 'detName'}):
                 currentTorrent.name((torrent.find('a', {'class': 'detLink'})['title'])[11:])
@@ -136,59 +170,23 @@ def main():
             else:
                 currentTorrent.seeders = '#'
 
-    x = PrettyTable()
-    x.field_names = ["#", "Name", "Size", "Seeders"]
-    x.align['Name'] = 'l'
-    x.align['Size'] = 'l'
-    x.align['Seeders'] = 'l'
-    for num, t in enumerate(top_torrents[:10], 1):
-        x.add_row([num, t.name, t.size, t.seeders])
-        t.magnet = t.magnet.split('&tr=', 1)[0]
+    selected = 'n'
+    amount = 10
 
-    print(x)
-    close = False
-    selected = input('Torrent num(s)? (n for next 10): ')
-    if(selected.lower() == 'n'):
-        for num, t in enumerate(top_torrents[10:], 11):
-            x.add_row([num, t.name, t.size, t.seeders])
-            t.magnet = t.magnet.split('&tr=', 1)[0]
-        print(x)
+    #displays torrents in a prettytable and gets user selection
+    while(selected.lower() == 'n'):
+        top_torrents, selected = display_torrents_found(amount)
+        amount = amount + 10
+
+        if(amount >= 50):
+            print('All torrents displayed, please select one or multiple (Ex: 1 5 15)')
+
+    #if user configured autodownload to be true, will call torrent client to download selected torrents
+    if(config['autodownload']['status'].lower() == 'true'):
+        autodownload()
+
     else:
         for num in selected.split():
-            if(config['autodownload']['status'].lower() == 'true'):
-                try:
-                    if(platform.system().lower() == 'windows'):
-                        call(['aria2c', '-d', f'{Path.home().joinpath(directory)}', '--seed-time=0', f'{top_torrents[int(num) - 1].magnet}'])
-                        close = True
-                    else:
-                        call(['sudo', 'deluge-console', 'add', '-p', f'~/{directory}', top_torrents[int(num) - 1].magnet])
-                        close = True
-                except:
-                    print("Error downloading torrent")
-                    print(top_torrents[int(num)-1].magnet)
-                    close=True
-            else:
-                print(top_torrents[int(num)-1].magnet)
-                close=True
-    if(close == True):
-        quit()
-
-    selected = input('Torrent num(s)? (ex: 1 5 4): ')
-    for num in selected.split():
-        if(config['autodownload']['status'].lower() == 'true'):
-            try:
-                if(platform.system().lower() == 'windows'):
-                    call(['aria2c', '-d', f'{Path.home().joinpath(directory)}', '--seed-time=0', f'{top_torrents[int(num) - 1].magnet}'])
-                else:
-                    call(['sudo', 'deluge-console', 'add', '-p', f'~/{directory}', top_torrents[int(num) - 1].magnet])
-            except:
-                print("Error downloading torrent")
-                print(top_torrents[int(num)-1].magnet)
-        else:
             print(top_torrents[int(num)-1].magnet)
-            close=True
 
 
-
-if __name__ == '__main__':
-    main()

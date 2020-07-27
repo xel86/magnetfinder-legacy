@@ -7,6 +7,16 @@ Supported Websites:
 
 ![](images/example.PNG)
 
+## Installation
+Install the external dependencies<br/>
+```
+pip install -r requirements.txt
+```
+and now run the script using python3
+```
+python3 magnetfinder.py
+```
+
 ## Usage
 After selecting whether nyaa or piratebay, specify if its a movie or series and give a search query<br/>
 In the terminal a PrettyTable will be returned with the top 20 torrent links sorted by seeders from that website<br/>
