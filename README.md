@@ -1,5 +1,5 @@
 # magnetfinder
-grabs magnet links for selected torrents through CLI (https://www.magnetfinder.net for web version)
+grabs magnet links for selected torrents through CLI
 
 Supported Websites:
 - nyaa 
