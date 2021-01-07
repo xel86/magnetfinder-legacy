@@ -11,6 +11,7 @@ from prettytable import PrettyTable
 from pathlib import Path
 from configparser import ConfigParser
 import platform
+import getopt, sys
 
 config = ConfigParser()
 config.read('config.ini')
@@ -146,13 +147,24 @@ def handle_anime_directories():
     return directory
 
 def autodownload():
+    if(vpnarg.lower() == 'true'):
+        try:
+            call(['sudo', 'nordvpn', 'connect'])
+        except:
+            print("failed to run NordVPN")
+
+    if(config['vpn']['status'].lower() == 'true' and vpnarg == None):
+        try:
+            call(['sudo', 'nordvpn', 'connect'])
+        except:
+            print("failed to run NordVPN")
     for num in selected.split():
         try:
             if(platform.system().lower() == 'windows'):
                 call(['aria2c', '-d', f'{Path.home().joinpath(directory)}', '--seed-time=0', f'{top_torrents[int(num) - 1].magnet}'])
                 
             else:
-                call(['sudo', 'deluge-console', 'add', '-p', f'~/{directory}', top_torrents[int(num) - 1].magnet])
+                call(['sudo', 'deluge-console', 'add', '-p', f'{directory}', top_torrents[int(num) - 1].magnet])
                 
         except:
             print("Error downloading torrent")
@@ -167,6 +179,22 @@ if __name__ == '__main__':
     original_query = input('Search Query: ')
     top_torrents = []
     directory = None
+    full_cmd_args = sys.argv
+    arg_list = full_cmd_args[1:]
+
+    short_options = "v:"
+    long_options = "vpn="
+    vpnarg = None
+
+    try:
+        arguments, values = getopt.getopt(arg_list, short_options, long_options)
+    except getopt.error as err:
+        print(str(err))
+        sys.exit(2)
+
+    for current_argument, current_value in arguments:
+        if current_argument in ("-v", "--vpn"):
+            vpnarg = current_value
 
     if(choice == 'nyaa'):
 
