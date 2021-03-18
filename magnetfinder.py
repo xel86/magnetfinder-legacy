@@ -153,7 +153,7 @@ def autodownload():
         except:
             print("failed to run NordVPN")
 
-    else if(config['vpn']['status'].lower() == 'true'):
+    elif(config['vpn']['status'].lower() == 'true'):
         try:
             call(['sudo', 'nordvpn', 'connect'])
         except:
