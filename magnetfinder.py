@@ -147,7 +147,7 @@ def handle_anime_directories():
     return directory
 
 def autodownload():
-    if(vpnarg.lower() == 'true'):
+    if(vpnarg and vpnarg.lower() == 'true'):
         try:
             call(['sudo', 'nordvpn', 'connect'])
         except:
