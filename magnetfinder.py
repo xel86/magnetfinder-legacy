@@ -160,14 +160,18 @@ def autodownload():
             print("failed to run NordVPN")
     for num in selected.split():
         try:
-            if(platform.system().lower() == 'windows'):
+            if(config['torrent-client']['client'].lower() == 'aria2c'):
                 call(['aria2c', '-d', f'{Path.home().joinpath(directory)}', '--seed-time=0', f'{top_torrents[int(num) - 1].magnet}'])
                 
-            else:
+            elif(config['torrent-client']['client'].lower() == 'deluge'):
                 call(['sudo', 'deluge-console', 'add', '-p', f'{directory}', top_torrents[int(num) - 1].magnet])
+            
+            elif(config['torrent-client']['client'].lower() == 'transmission'):
+                print(f'{Path.home().joinpath(directory)}')
+                call(['transmission-remote', '-w', f'{Path.home().joinpath(directory)}', '-a', top_torrents[int(num) - 1].magnet])
                 
         except:
-            print("Error downloading torrent")
+            print(f"Error auto-downloading torrent from selected torrent client {config['torrent-client']['client']}")
             print(top_torrents[int(num)-1].magnet)
             
 
